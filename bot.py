@@ -17,6 +17,8 @@ threading.Thread(target=keep_alive, daemon=True).start()
 
 #Пинг бота/
 
+from dotenv import load_dotenv
+from http.server import HTTPServer, BaseHTTPRequestHandler
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
@@ -27,6 +29,11 @@ from datetime import datetime
 from config import *
 from database import *
 from keyboards import *
+
+load_dotenv()
+
+TOKEN = os.getenv('VK_TOKEN')
+GROUP_ID = int(os.getenv('VK_GROUP_ID'))
 
 # Инициализация бота
 vk_session = vk_api.VkApi(token=TOKEN)
@@ -479,3 +486,19 @@ for event in longpoll.listen():
                 send_text_message(user_id, f"⚠️ Произошла ошибка. Пожалуйста, попробуйте снова.")
             except:
                 pass
+
+
+# Веб-сервер для Render (чтобы был открыт порт)
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b'Bot is running!')
+
+def run_web_server():
+    port = int(os.environ.get('PORT', 8000))
+    server = HTTPServer(('0.0.0.0', port), Handler)
+    server.serve_forever()
+
+# Запускаем веб-сервер в отдельном потоке
+threading.Thread(target=run_web_server, daemon=True).start()
