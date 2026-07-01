@@ -1,3 +1,22 @@
+import threading
+import time
+import requests
+
+def keep_alive():
+    url = "https://beautylot.onrender.com"
+    while True:
+        try:
+            requests.get(url)
+            print("💓 Пинг отправлен")
+        except:
+            pass
+        time.sleep(600)  # каждые 10 минут
+
+# Запускаем в отдельном потоке
+threading.Thread(target=keep_alive, daemon=True).start()
+
+#Пинг бота/
+
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
